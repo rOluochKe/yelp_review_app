@@ -5,6 +5,8 @@ import { RestaurantsContext } from '../context/RestaurantsContext'
 
 import { useHistory } from 'react-router-dom'
 
+import StarRating from './StarRating'
+
 const RestaurantList = (props) => {
   const { restaurants, setRestaurants } = useContext(RestaurantsContext)
 
@@ -45,7 +47,17 @@ const RestaurantList = (props) => {
     history.push(`/restaurants/${id}`)
   }
 
-  const renderRating = (restaurant) => {}
+  const renderRating = (restaurant) => {
+    if (!restaurant.count) {
+      return <span className='text-warning'>0 reviews</span>
+    }
+    return (
+      <>
+        <StarRating rating={restaurant.id} />
+        <span className='text-warning ml-1'>({restaurant.count})</span>
+      </>
+    )
+  }
 
   return (
     <div className='list-group'>
