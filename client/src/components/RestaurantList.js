@@ -1,6 +1,52 @@
-import React from 'react'
+import React, { useEffect, useContext } from 'react'
 
-const RestaurantList = () => {
+import RestaurantFinder from '../apis/RestaurantFinder'
+import { RestaurantsContext } from '../context/RestaurantsContext'
+
+import { useHistory } from 'react-router-dom'
+
+const RestaurantList = (props) => {
+  const { restaurants, setRestaurants } = useContext(RestaurantsContext)
+
+  let history = useHistory()
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await RestaurantFinder.get('/')
+        console.log(response.data.data)
+        setRestaurants(response.data.data.restaurants)
+      } catch (err) {}
+    }
+
+    fetchData()
+  }, [])
+
+  const handleDelete = async (e, id) => {
+    e.stopPropagation()
+    try {
+      const response = await RestaurantFinder.delete(`/${id}`)
+      setRestaurants(
+        restaurants.filter((restaurant) => {
+          return restaurant.id !== id
+        })
+      )
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const handleUpdate = (e, id) => {
+    e.stopPropagation()
+    history.push(`/restaurants/${id}/update`)
+  }
+
+  const handleRestaurantSelect = (id) => {
+    history.push(`/restaurants/${id}`)
+  }
+
+  const renderRating = (restaurant) => {}
+
   return (
     <div className='list-group'>
       <table className='table table-hover table-dark'>
@@ -15,7 +61,38 @@ const RestaurantList = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
+          {restaurants &&
+            restaurants.map((restaurant) => {
+              return (
+                <tr
+                  onClick={() => handleRestaurantSelect(restaurant.id)}
+                  key={restaurant.id}
+                >
+                  <td>{restaurant.name}</td>
+                  <td>{restaurant.location}</td>
+                  <td>{'$'.repeat(restaurant.price_range)}</td>
+                  <td>{renderRating(restaurant)}</td>
+                  <td>
+                    <button
+                      onClick={(e) => handleUpdate(e, restaurant.id)}
+                      className='btn btn-warning'
+                    >
+                      Update
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      onClick={(e) => handleDelete(e, restaurant.id)}
+                      className='btn btn-danger'
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
+
+          {/* <tr>
             <td>mcdonalds</td>
             <td>New YOrk</td>
             <td>$$</td>
@@ -38,7 +115,7 @@ const RestaurantList = () => {
             <td>
               <button className='btn btn-danger'>Delete</button>
             </td>
-          </tr>
+          </tr> */}
         </tbody>
       </table>
     </div>
